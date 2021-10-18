@@ -1,0 +1,28 @@
+name = "cloudflare-assignment"
+account_id = "0c7c1614e53beff8545fcdb45b3166f4"
+type = "javascript"
+workers_dev = true
+compatibility_date = "2021-10-17"
+compatibility_flags = ["formdata_parser_supports_files"] # required
+
+kv_namespaces = [
+    { binding = "ASSIGNMENT_KV", preview_id = "c5a5c03b592a4d69a1a33404eb53d4e0", id = "7d23d76d8be945e4ac0bf843efa3f7f7" },
+]
+
+[vars]
+WORKERS_RS_VERSION = "0.0.6"
+
+[build]
+command = "cargo install -q worker-build && worker-build --release" # required
+
+[build.upload]
+dir = "build/worker"
+format = "modules"
+main = "./shim.mjs"
+
+[[build.upload.rules]]
+globs = ["**/*.wasm"]
+type = "CompiledWasm"
+
+# read more about configuring your Worker via wrangler.toml at:
+# https://developers.cloudflare.com/workers/cli-wrangler/configuration
