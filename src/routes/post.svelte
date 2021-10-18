@@ -10,11 +10,13 @@
 
     async function submit() {
         try {
+            error = null;
             console.log(username, title, type, content);
             await superagent.get(url);
             await superagent.post(url).send({ username, title, type, content });
+            location.replace("/");
         } catch (e) {
-            error = `Posting failed! ${e.text}`;
+            error = e.response.text;
         }
     }
 
@@ -79,6 +81,11 @@
             />
         </div>
     </div>
+    {#if error != null}
+        <div class="notification is-danger">
+            {error}
+        </div>
+    {/if}
 
     <div class="field is-grouped">
         <div class="control">
