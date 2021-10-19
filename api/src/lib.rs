@@ -1,12 +1,9 @@
-use claims::Claims;
-use futures::future;
-use rand::Rng;
-
-use worker::*;
-
-mod claims;
 mod post;
 mod utils;
+
+use futures::future;
+use rand::Rng;
+use worker::*;
 
 use post::Post;
 
@@ -20,12 +17,7 @@ fn log_request(req: &Request) {
     );
 }
 
-fn set_headers(
-    req: Request,
-    res: Response,
-    content_type: &str,
-    cookie: Option<&str>,
-) -> Result<Response> {
+fn set_headers(req: Request, res: Response, content_type: &str) -> Result<Response> {
     let mut headers = Headers::new();
     headers.set("Content-Type", content_type)?;
     // Fix annoying CORS errors
@@ -42,9 +34,6 @@ fn set_headers(
         "Access-Control-Allow-Headers",
         "X-Requested-With, Content-Type, Accept, Origin, Authorization",
     )?;
-    if let Some(cookie) = cookie {
-        headers.set("Set-Cookie", cookie)?;
-    }
     Ok(res.with_headers(headers))
 }
 
@@ -69,7 +58,7 @@ pub async fn main(req: Request, env: Env) -> Result<Response> {
     router
         .get("/", |_, _| Response::ok("Hello from Workers!"))
         .options("/posts", |req, _| {
-            Response::empty().and_then(|res| set_headers(req, res, "text/plain", None))
+            Response::empty().and_then(|res| set_headers(req, res, "text/plain"))
         })
         .get_async("/posts", |req, ctx| async move {
             let posts = ctx.data();
@@ -83,7 +72,7 @@ pub async fn main(req: Request, env: Env) -> Result<Response> {
                 .filter_map(|x| serde_json::from_str(&x.as_string()).ok())
                 .collect();
             Response::ok(serde_json::to_string(&values).unwrap())
-                .and_then(|res| set_headers(req, res, "application/json", None))
+                .and_then(|res| set_headers(req, res, "application/json"))
         })
         .post_async("/posts", |mut req, ctx| async move {
             let form: Post = match req.json().await {
@@ -91,8 +80,7 @@ pub async fn main(req: Request, env: Env) -> Result<Response> {
                 Ok(x) => x,
             };
             if let Err(e) = form.validate() {
-                return Response::error(e, 400)
-                    .and_then(|res| set_headers(req, res, "text/plain", None));
+                return Response::error(e, 400).and_then(|res| set_headers(req, res, "text/plain"));
             }
             let posts = ctx.data();
             let rand_id = rand::thread_rng().gen::<u128>().to_string();
@@ -100,13 +88,7 @@ pub async fn main(req: Request, env: Env) -> Result<Response> {
                 .put(&rand_id, serde_json::to_string(&form)?)?
                 .execute()
                 .await?;
-            Response::ok("success").and_then(|res| set_headers(req, res, "text/plain", None))
-        })
-        .get("/auth/:username", |req, ctx| {
-            let username = ctx.param("username").ok_or(Error::RouteNoDataError)?;
-            let token = Claims::generate_token(username.to_string())?;
-            let cookie = format!("lensflare-auth={}; HttpOnly", token);
-            Response::ok("").and_then(|res| set_headers(req, res, "text/plain", Some(&cookie)))
+            Response::ok("success").and_then(|res| set_headers(req, res, "text/plain"))
         })
         .run(req, env)
         .await

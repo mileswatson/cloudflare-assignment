@@ -1,8 +1,7 @@
 name = "lensflare-api"
-account_id = "0c7c1614e53beff8545fcdb45b3166f4"
 type = "javascript"
 workers_dev = true
-compatibility_date = "2021-10-17"
+compatibility_date = "2021-10-19"
 compatibility_flags = ["formdata_parser_supports_files"] # required
 
 kv_namespaces = [
