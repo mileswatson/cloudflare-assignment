@@ -2,7 +2,7 @@
     import superagent from "superagent";
     import { text } from "svelte/internal";
 
-    let url = "https://cloudflare-assignment.mileswatson.workers.dev/posts";
+    let url = "https://lensflare-api.mileswatson.workers.dev/posts";
 
     let request = superagent.get(url);
 </script>
