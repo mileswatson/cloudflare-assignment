@@ -1,7 +1,7 @@
 <script lang="ts">
     import superagent from "superagent";
 
-    let url = "https://cloudflare-assignment.mileswatson.workers.dev/posts";
+    let url = "https://lensflare-api.mileswatson.workers.dev/posts";
 
     let username = "";
     let title = "";
