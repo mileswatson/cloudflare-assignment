@@ -20,7 +20,7 @@
                     <div class="card">
                         {#if post["type"] == "image"}
                             <div class="card-image">
-                                <figure class="image is-4by3">
+                                <figure class="image">
                                     <img src={post["content"]} alt="Post" />
                                 </figure>
                             </div>
